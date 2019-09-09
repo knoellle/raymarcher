@@ -1,4 +1,5 @@
 #include "iostream"
+#include "algorithm"
 #include "SFML/Graphics.hpp"
 #include "SFML/OpenGL.hpp"
 #include <Eigen/Dense>
@@ -20,7 +21,7 @@ Scene::Scene() :
     cam_mat(Eigen::Matrix4f::Identity()),
     cam_x(0.0),
     cam_y(0.0),
-    cam_pos(0.0f, 0.0f, 0.0f),
+    cam_pos(0.0f, 0.5f, 0.0f),
     cam_momentum(0.0f, 0.0f, 0.0f),
     cam_rot_momentum(0.0f, 0.0f),
     debug_values{0.0},
@@ -42,7 +43,17 @@ void Scene::addDebugMomentum(const int index, const double value, const double d
 
 void Scene::update(const double dt)
 {
-    cam_pos += (AngleAxis<float>(cam_x, Vector3f::UnitY()).toRotationMatrix()) * cam_momentum * dt;
+    cam_pos[0] = 3.5f;
+    //cam_pos[1] = 0.5f;
+
+    cam_momentum[2] = std::max(4.0f, cam_momentum[2]);
+    if (abs(fmod(cam_pos[2], 7.0f) - 3.5f) < 1.0f)
+    {
+        cam_momentum[2] += 75.0f * dt;
+        std::cout << cam_momentum[2] << "\n";
+    }
+
+    cam_pos += /*(AngleAxis<float>(cam_x, Vector3f::UnitY()).toRotationMatrix()) */ cam_momentum * dt;
     cam_momentum -= cam_momentum * dt * 3.0;
 
     cam_x += cam_rot_momentum.x() * dt;

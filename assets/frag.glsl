@@ -134,7 +134,7 @@ vec3 applyFog(in vec3 col, in float dist, in vec3 rayDir, in vec3 sunDir)
 vec4 render_scene(in vec2 uv)
 {
     vec4 col;
-    vec3 lpos = vec3(cos(iTime * 0.2), sin(iTime* 0.2), 0.0);
+    vec3 lpos = vec3(cos(iTime * 0.2), sin(iTime * 0.2) * 0.5 + 0.6, sin(iTime* 0.2));
     vec3 ldir = normalize(lpos);
     vec3 camera_position = vec3(0.0, 0.0, -5.0);
     vec3 ro = iMat[3].xyz;
@@ -168,7 +168,7 @@ vec4 render_scene(in vec2 uv)
         vec3 srd;
         vec3 sro = p + normal*0.001;
         float shadow = 0.0;
-        const float shadowRayCount = 4;
+        const float shadowRayCount = 1;
         srd = normalize(lpos);
         for (int x = 0; x < shadowRayCount; ++x)
         {
@@ -185,9 +185,7 @@ vec4 render_scene(in vec2 uv)
         col = vec4(color * (diffuse_intensity * shadow + ambient), 1.0);
     }
     // fog
-    col.xyz = applyFog(col.xyz, d*0.0006, rd, ldir*1.4);
-    // ambient occlusion
-    col.xyz *= (1.0-vec3(stepcount/1000));
+    col.xyz = applyFog(col.xyz, d*0.012, rd, ldir*1.4);
 
     return vec4(debug_color.xyz * debug_color.w, 1.0) + (1.0 - debug_color.w) * col;
 }
@@ -200,8 +198,9 @@ void main()
 
     vec4 col = render_scene(uv);//vec4(0.5, 0.25, 0.0, 1.0);
     col = pow(col, vec4(vec3(0.4545), 1.0)); // Gamma correction (1.0 / 2.2)
-    col.w = 0.9;
+    //col.w = 0.9;
+    col = smoothstep(0.0, 1.0, col);
 
-    gl_FragColor = smoothstep(0.0, 1.0, col);
+    gl_FragColor = col;
 }
 
